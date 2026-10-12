@@ -1,0 +1,23 @@
+.Layout-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.Layout-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f5f2f2;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1rem;
+    background-color: #5c54b9;
+}
+
+@media (max-width: 600px) {
+    .Layout-content {
+        justify-content: center;
+    }
+}
