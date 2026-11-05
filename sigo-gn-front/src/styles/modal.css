@@ -1,0 +1,19 @@
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 20px 40px;
+  border: black solid 1px;
+  border-radius: 10px;
+}
+
+.modal-blur {
+  backdrop-filter: blur(10px);
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}

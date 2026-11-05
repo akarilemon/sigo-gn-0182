@@ -3,7 +3,8 @@ import Layout from './components/Layout';
 import RutaProtegida from './components/RutaProtegida.jsx';
 import AuthProvider from './context/AuthContext.jsx';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';  
+import Dashboard from './pages/Dashboard'; 
+import Expedientes from './pages/Expedientes';
 import './App.css';
 
 
@@ -17,6 +18,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route element={<RutaProtegida/>}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/expedientes" element={<Expedientes />} />
               </Route>
             </Routes>
           </div>
