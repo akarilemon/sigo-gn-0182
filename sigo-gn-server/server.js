@@ -7,6 +7,9 @@ const port = 4000;
 
 const folder = './data/expedientes/'; //path paera acceder a folios y evitar redundancia gg
 
+const ESTATUS = ['Abierto', 'En proceso', 'Cerrado'];
+const PRIORIDADES = ['Alta', 'Media', 'Baja'];
+
 app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -44,17 +47,21 @@ const siguienteFolio = async () => {
  
 app.post('/expedientes', async (req, res) => {
   try {
-    // El folio ya no lo manda el cliente: se genera automaticamente
     const {nombre, inc, zona, fecha, desc} = req.body;
+    const estatus = req.body.estatus ?? 'Abierto';
+    const prioridad = req.body.prioridad ?? 'Media';
+    if (!ESTATUS.includes(estatus) || !PRIORIDADES.includes(prioridad)) {
+      return res.status(400).json({success: false, message: "Estatus o prioridad invalidos."});
+    }
+   
+    const ahora = new Date().toISOString();
     let numero = await siguienteFolio();
  
-    // Reintenta si dos peticiones simultaneas obtienen el mismo numero
     for (let intento = 0; intento < 10; intento++, numero++) {
       const folio = String(numero);
-      const data = {folio, nombre, inc, zona, fecha, desc};
+      const data = {folio, nombre, inc, zona, fecha, desc, estatus, prioridad, fechaCreacion: ahora, fechaModificacion: ahora};
       const fileName = path.join(folder, `EXP-0182-${folio}.json`);
       try {
-        // flag 'wx': falla con EEXIST si el archivo ya existe
         await fs.writeFile(fileName, JSON.stringify(data, null, 2), {encoding: 'utf8', flag: 'wx'});
         return res.status(201).json({success: true, expediente: data});
       } catch (e) {
@@ -85,17 +92,36 @@ app.put('/expedientes/:folio', async (req, res) => {
     const {nombre, inc, zona, fecha, desc} = req.body;
     if (!nombre && !inc && !zona) {
       return res.status(400).json({ success: false, message: "El cuerpo de la petición (body) está vacío o incompleto." });
-    } 
+    }
+
+    const fileName = path.join(folder, `EXP-0182-${folio}.json`);
+
+    let actual;
+    try {
+      actual = JSON.parse(await fs.readFile(fileName, 'utf8'));
+    } catch (e) {
+      return res.status(404).json({success: false, message: "El folio no existe."});
+    }
+
+    const estatus = req.body.estatus ?? actual.estatus ?? 'Abierto';
+    const prioridad = req.body.prioridad ?? actual.prioridad ?? 'Media';
+    if (!ESTATUS.includes(estatus) || !PRIORIDADES.includes(prioridad)) {
+      return res.status(400).json({success: false, message: "Estatus o prioridad invalidos."});
+    }
+
     const data = {
       folio,
       nombre,
       inc,
       zona,
       fecha,
-      desc
+      desc,
+      estatus,
+      prioridad,
+      fechaCreacion: actual.fechaCreacion,
+      fechaModificacion: new Date().toISOString()
     };
     
-    const fileName = path.join(folder, `EXP-0182-${folio}.json`);
     console.log(path.resolve(fileName)); 
     
     await fs.writeFile(fileName, JSON.stringify(data, null, 2), {encoding: 'utf8'});

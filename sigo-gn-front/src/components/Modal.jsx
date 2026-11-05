@@ -10,6 +10,8 @@ function Modal({onSubmit, type = 'UPDATE', onClose, isOpen, prevData}) {
     nombre: prevData ? prevData.nombre: "",
     inc: prevData ? prevData.inc: "",
     zona: prevData ? prevData.zona: "",
+    estatus: prevData?.estatus ?? "Abierto",
+    prioridad: prevData?.prioridad ?? "Media",
     fecha: prevData ? prevData.fecha: "",
     desc: prevData ? prevData.desc: ""
   });
@@ -81,6 +83,24 @@ function Modal({onSubmit, type = 'UPDATE', onClose, isOpen, prevData}) {
         </label>
 
         <label>
+          <p>Estatus:</p>
+          <select name="estatus" onChange={handleChange} value={data.estatus}>
+            <option value="Abierto">Abierto</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Cerrado">Cerrado</option>
+          </select>
+        </label>
+
+        <label>
+          <p>Prioridad:</p>
+         <select name="prioridad" onChange={handleChange} value={data.prioridad}>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </label>
+
+        <label>
           <p>Ingrese la fecha del operativo:</p>
           <input
             type="text"
@@ -89,6 +109,7 @@ function Modal({onSubmit, type = 'UPDATE', onClose, isOpen, prevData}) {
             value={data.fecha}
           required/>
         </label>
+
 
         <label>
           <p>Ingrese la descripcion del operativo:</p>

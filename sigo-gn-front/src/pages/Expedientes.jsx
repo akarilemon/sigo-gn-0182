@@ -3,6 +3,8 @@ import Modal from "../components/Modal";
 
 import {getExpedientes, crearExpediente, modificarExpediente, eliminarExpediente} from "../api/api.js";
 
+const formatearFecha = (iso) => iso ? new Date(iso).toLocaleString("es-MX") : "—";
+
 function Expedientes() {
   const[expedientes, setExpedientes] = useState([]);
   const[isVisibleModal, setIsVisibleModal] = useState(false);
@@ -122,7 +124,11 @@ return (
 <th>Nombre</th>
 <th>Incidente</th>
 <th>Zona</th>
+<th>Estatus</th>
+<th>Prioridad</th>
 <th>Fecha</th>
+<th>Creación</th>
+<th>Modificación</th>
 <th>Descripción</th>
 <th>Opciones</th>
 </tr>
@@ -134,7 +140,11 @@ return (
 <td>{expediente.nombre}</td>
 <td>{expediente.inc}</td>
 <td>{expediente.zona}</td>
-<td>{expediente.fecha}</td>
+<td>{expediente.estatus ?? "—"}</td>
+<td>{expediente.prioridad ?? "—"}</td>
+ <td>{expediente.fecha}</td>
+<td>{formatearFecha(expediente.fechaCreacion)}</td>
+<td>{formatearFecha(expediente.fechaModificacion)}</td>
 <td>{expediente.desc}</td>
 <td>
 <button onClick={() => openModal("UPDATE", expediente)}>Modificar</button>
