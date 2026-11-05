@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import Modal from "../components/Modal";
 
-import {getExpedientes, crearExpediente, modificarExpediente, eliminarExpediente} from "../api/api.js";
+import {getExpedientes, buscarExpedientes, crearExpediente, modificarExpediente, eliminarExpediente} from "../api/api.js";
 
 const formatearFecha = (iso) => iso ? new Date(iso).toLocaleString("es-MX") : "—";
 
@@ -10,10 +10,11 @@ function Expedientes() {
   const[isVisibleModal, setIsVisibleModal] = useState(false);
   const[modalType, setModalType] = useState("REGISTER");
   const[updateData, setUpdateData] = useState(null);
-
-  const fetchExpedientes = async() => {
+  const[texto, setTexto] = useState("");
+  
+  const fetchExpedientes = async(textoBusqueda = "") => {
     try {
-      const res = await getExpedientes();
+      const res = textoBusqueda.trim() ? await buscarExpedientes(textoBusqueda) : await getExpedientes();
       const data = await res.json();
 
       if(!res.ok) {
@@ -29,7 +30,7 @@ function Expedientes() {
   }
 
   const cargarExpedientes = async() => {
-    setExpedientes(await fetchExpedientes());
+    setExpedientes(await fetchExpedientes(texto));
   }
 
   const toggleModal = () => {
@@ -107,16 +108,30 @@ console.log(error)
 }
 
 useEffect(() => {
-fetchExpedientes().then(expeds => {
-setExpedientes(expeds);
+let vigente = true;
+const temporizador = setTimeout(() => {
+fetchExpedientes(texto).then(expeds => {
+if (vigente) setExpedientes(expeds);
 });
-}, [])
+}, texto ? 300 : 0);
+
+return () => {
+vigente = false;
+clearTimeout(temporizador);
+};
+}, [texto])
 
 
 // folio, nombre, incidente, zona, fecha, descripcion
 return (
 <div>
 <button onClick={() => openModal("REGISTER")}>Registrar nuevo Expediente</button>
+<input
+type="search"
+placeholder="Buscar por folio, nombre o descripción..."
+value={texto}
+onChange={(e) => setTexto(e.target.value)}
+/>
 <table>
 <thead>
 <tr>
@@ -134,6 +149,9 @@ return (
 </tr>
 </thead>
 <tbody>
+{expedientes.length === 0 && (
+<tr><td colSpan={11}>No se encontraron expedientes.</td></tr>
+)}
 {expedientes?.map((expediente, i) => (
 <tr key={i}>
 <td>{expediente.folio}</td>

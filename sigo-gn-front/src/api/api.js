@@ -2,6 +2,8 @@ const API_URL = "http://localhost:4000";
 
 export const getExpedientes = () => fetch(`${API_URL}/expedientes`);
 
+export const buscarExpedientes = (texto) => fetch(`${API_URL}/expedientes/buscar?texto=${encodeURIComponent(texto)}`);
+
 export const crearExpediente = (data) => fetch(`${API_URL}/expedientes`,{
   method: 'POST',
   headers: {

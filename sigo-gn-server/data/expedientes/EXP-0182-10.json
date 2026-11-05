@@ -1,0 +1,12 @@
+{
+  "folio": "10",
+  "nombre": "Operativo 10",
+  "inc": "Incidente J",
+  "zona": "Oeste",
+  "fecha": "05-02-2020",
+  "desc": "Hola",
+  "estatus": "En proceso",
+  "prioridad": "Baja",
+  "fechaCreacion": "2026-11-05T17:47:03.838Z",
+  "fechaModificacion": "2026-11-05T17:47:03.838Z"
+}

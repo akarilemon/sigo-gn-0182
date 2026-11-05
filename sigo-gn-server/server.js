@@ -14,6 +14,54 @@ app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
+const leerExpedientes = async () => {
+  const files = await fs.readdir(folder);
+  const result = [];
+
+  for (const file of files) {
+    if(file.endsWith('.json')) {
+      const filePath = path.join(folder, file);
+      const data = await fs.readFile(filePath, 'utf8');
+      result.push(JSON.parse(data));
+    }
+  }
+
+  return result;
+};
+ 
+app.get('/expedientes', async (req, res) => {
+  try {
+    res.status(200).json(await leerExpedientes());
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({error: error.message});
+  }
+});
+ 
+app.get('/expedientes/buscar', async (req, res) => {
+  try {
+    const texto = String(req.query.texto ?? '').trim().toLowerCase();
+    const expedientes = await leerExpedientes();
+
+    if (!texto) {
+      return res.status(200).json(expedientes);
+    }
+
+    const resultado = expedientes.filter((exp) => {
+      const folio = String(exp.folio ?? '').toLowerCase();
+      const folioCompleto = `exp-0182-${folio}`;
+      const nombre = String(exp.nombre ?? '').toLowerCase();
+      const desc = String(exp.desc ?? '').toLowerCase();
+      return folioCompleto.includes(texto) || nombre.includes(texto) || desc.includes(texto);
+    });
+
+    res.status(200).json(resultado);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({error: error.message});
+  }
+});
+
 app.get('/expedientes', async (req, res) => {
   try {
     const files = await fs.readdir(folder);
