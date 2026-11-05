@@ -10,15 +10,24 @@ function Expedientes() {
   const[updateData, setUpdateData] = useState(null);
 
   const fetchExpedientes = async() => {
-    const res = await getExpedientes();
-    const data = await res.json();
+    try {
+      const res = await getExpedientes();
+      const data = await res.json();
 
-    if(!data.success) {
-      console.log("Error: " + data.error);
+      if(!res.ok) {
+        console.log("Error: " + data.error);
+        return[];
+      }
+
+      return data; // el servidor responde directamente con el arreglo de expedientes
+    } catch (error) {
+      console.log(error);
       return[];
     }
-    
-    return data.expedientes;
+  }
+
+  const cargarExpedientes = async() => {
+    setExpedientes(await fetchExpedientes());
   }
 
   const toggleModal = () => {
@@ -36,15 +45,18 @@ try {
 const res = await crearExpediente(formData);
 const data = await res.json();
 
-if(!data.success) {
-console.log("Error: " + data.error);
-alert("Problemas con el folio")
+if(!res.ok || !data.success) {
+console.log("Error: " + (data.message || data.error));
+alert(data.message || "Problemas con el folio");
 return;
 }
 
-alert("Folio creado con exito")
+alert("Folio " + data.expediente.folio + " creado con exito");
+setIsVisibleModal(false);
+await cargarExpedientes();
 } catch (error) {
-console.log(error)
+console.log(error);
+alert("No se pudo conectar con el servidor");
 }
 }
 
@@ -53,13 +65,15 @@ try {
 const res = await modificarExpediente(formData);
 const data = await res.json();
 
-if(!data.success) {
-console.log("Error: " + data.error);
-alert("Problemas con el folio")
+if(!res.ok) {
+console.log("Error: " + (data.message || data.error));
+alert(data.message || "Problemas con el folio");
 return;
 }
 
-alert("Folio modificado con exito")
+alert("Folio modificado con exito");
+setIsVisibleModal(false);
+await cargarExpedientes();
 } catch (error) {
 console.log(error)
 }
@@ -76,13 +90,14 @@ try {
 const res = await eliminarExpediente(formData);
 const data = await res.json();
 
-if(!data.success) {
-console.log("Error: " + data.error);
-alert("Problemas con el folio")
+if(!res.ok || !data.success) {
+console.log("Error: " + (data.message || data.error));
+alert(data.message || "Problemas con el folio");
 return;
 }
 
-alert("Folio eliminado con exito")
+alert("Folio eliminado con exito");
+await cargarExpedientes();
 } catch (error) {
 console.log(error)
 }
@@ -90,12 +105,10 @@ console.log(error)
 }
 
 useEffect(() => {
-
 fetchExpedientes().then(expeds => {
 setExpedientes(expeds);
 });
-
-}, [expedientes])
+}, [])
 
 
 // folio, nombre, incidente, zona, fecha, descripcion
@@ -119,10 +132,10 @@ return (
 <tr key={i}>
 <td>{expediente.folio}</td>
 <td>{expediente.nombre}</td>
-<td>{expediente.incidente}</td>
+<td>{expediente.inc}</td>
 <td>{expediente.zona}</td>
 <td>{expediente.fecha}</td>
-<td>{expediente.descripcion}</td>
+<td>{expediente.desc}</td>
 <td>
 <button onClick={() => openModal("UPDATE", expediente)}>Modificar</button>
 <button onClick={() => onDelete(expediente)}>Eliminar</button>

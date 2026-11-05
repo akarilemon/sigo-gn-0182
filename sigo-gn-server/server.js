@@ -31,31 +31,42 @@ app.get('/expedientes', async (req, res) => {
   }
 }); //se accede a todos los folios y se parsean en json
 
+const siguienteFolio = async () => {
+  await fs.mkdir(folder, {recursive: true});
+  const files = await fs.readdir(folder);
+  let max = 0;
+  for (const file of files) {
+    const match = file.match(/^EXP-0182-(\d+)\.json$/);
+    if (match) max = Math.max(max, parseInt(match[1], 10));
+  }
+  return max + 1;
+};
+ 
 app.post('/expedientes', async (req, res) => {
   try {
-    const {folio, nombre, inc, zona, fecha, desc} = req.body;
-
-    const data = {
-      folio, 
-      nombre, 
-      inc, 
-      zona, 
-      fecha, 
-      desc
-    };
-
-   // if (folio == undefined) {res.status(404).json({success:false, message: "Folio sin determinar."});}
-    const fileName = path.join(folder, `EXP-0182-${folio}.json`);
-    try {
-      await fs.stat(fileName);
-      res.status(400).json({success: false, message: "Archivo ya existe."});
-    } catch (e) {
-      await fs.writeFile(fileName, JSON.stringify(data,null,2), {encoding: 'utf8'});
-      res.status(200).json(data);
+    // El folio ya no lo manda el cliente: se genera automaticamente
+    const {nombre, inc, zona, fecha, desc} = req.body;
+    let numero = await siguienteFolio();
+ 
+    // Reintenta si dos peticiones simultaneas obtienen el mismo numero
+    for (let intento = 0; intento < 10; intento++, numero++) {
+      const folio = String(numero);
+      const data = {folio, nombre, inc, zona, fecha, desc};
+      const fileName = path.join(folder, `EXP-0182-${folio}.json`);
+      try {
+        // flag 'wx': falla con EEXIST si el archivo ya existe
+        await fs.writeFile(fileName, JSON.stringify(data, null, 2), {encoding: 'utf8', flag: 'wx'});
+        return res.status(201).json({success: true, expediente: data});
+      } catch (e) {
+        if (e.code !== 'EEXIST') throw e;
+      }
     }
-    } catch (error) {console.log(error.message); res.status(500).json({error: error.message});}
+    return res.status(409).json({success: false, message: "No se pudo asignar un folio, intente de nuevo."});
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({success: false, error: error.message});
+  }
 });
-
 app.get('/expedientes/:folio', async (req ,res) => {
   try {
     const {folio} = req.params;
