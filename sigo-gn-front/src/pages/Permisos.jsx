@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-+import { ROLES, PERMISOS, aSimbolico } from '../utils/permisos.js';
+import { ROLES, PERMISOS, aSimbolico } from '../utils/permisos.js';
 
 function Permisos() {
     return (
