@@ -9,6 +9,25 @@ const folder = './data/expedientes/'; //path paera acceder a folios y evitar red
 
 const ESTATUS = ['Abierto', 'En proceso', 'Cerrado'];
 const PRIORIDADES = ['Alta', 'Media', 'Baja'];
+const PERMISOS = {LEER: 4, ESCRIBIR: 2, ELIMINAR: 1};
+const ROLES = {Comandante: 7, Oficial: 6, Analista: 4};
+
+const tienePermiso = (rol, accion) => {
+  const valorOctal = Object.hasOwn(ROLES, rol) ? ROLES[rol] : 0;
+  return (valorOctal & accion) === accion;
+};
+
+const requierePermiso = (accion) => (req, res, next) => {
+  const rol = req.get('x-rol');
+  if (!tienePermiso(rol, accion)) {
+    console.log(`403 ${req.method} ${req.originalUrl} (rol: ${rol ?? 'sin rol'})`);
+    return res.status(403).json({
+      success: false,
+      message: `Acceso prohibido: el rol "${rol ?? 'sin rol'}" no tiene permiso para esta accion.`
+    });
+  }
+  next();
+};
 
 app.use(cors());
 app.use(express.urlencoded({extended: true}));

@@ -1,10 +1,12 @@
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Layout from './components/Layout';
 import RutaProtegida from './components/RutaProtegida.jsx';
+import RutaPorRol from './components/RutaPorRol.jsx';
 import AuthProvider from './context/AuthContext.jsx';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard'; 
 import Expedientes from './pages/Expedientes';
+import Permisos from './pages/Permisos';
 import './App.css';
 
 
@@ -19,6 +21,9 @@ function App() {
               <Route element={<RutaProtegida/>}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/expedientes" element={<Expedientes />} />
+                <Route element={<RutaPorRol rolesPermitidos={['Comandante']} />}>
+                  <Route path="/permisos" element={<Permisos />} />
+                </Route>
               </Route>
             </Routes>
           </div>
