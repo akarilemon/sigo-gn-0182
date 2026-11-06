@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Dashboard() {
     const navigate = useNavigate(); 
@@ -18,6 +19,11 @@ function Dashboard() {
         <div>
             <h1>Bienvenido al Dashboard</h1>
             <h2>Usuario: {user.nombre}</h2>
+            <h3>Rol: {user.rol}</h3>
+            <nav>
+                <Link to="/expedientes">Expedientes</Link>
+                {user.rol === 'Comandante' && <> | <Link to="/permisos">Permisos</Link></>}
+            </nav>
             <button type="button" onClick={handleLogout}>Cerrar sesión</button>
         </div>
 
